@@ -17,8 +17,12 @@ class WordRepository {
   }
 
   def get(word: String): Option[Word] = db.get(word).map(definition => Word(word, definition))
+
+  def getAll(): List[Word] = db.toList.map { case (w, d) => Word(w, d) }
 }
 
 object WordRepository {
+
   case class DuplicateRecordException(message: String) extends Exception(message)
+
 }

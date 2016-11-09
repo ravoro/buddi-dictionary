@@ -29,7 +29,6 @@ class WordController @Inject()(val messagesApi: MessagesApi,
           case Failure(e: DuplicateRecordException) => BadRequest(views.html.wordAdd(addForm)).flashing("msggg" -> "wordalreadyexists")
           case Failure(e) => throw e
         }
-
       }
     )
   }
@@ -39,5 +38,9 @@ class WordController @Inject()(val messagesApi: MessagesApi,
       case Some(w) => Ok(views.html.word(w))
       case _ => NotFound
     }
+  }
+
+  def getAll() = Action {
+    Ok(views.html.wordAll(wordsRepo.getAll()))
   }
 }

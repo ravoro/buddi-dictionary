@@ -1,0 +1,11 @@
+@(words: List[Word])(implicit messages: Messages)
+
+@main(s"Words") {
+    <dl>
+    @for(word <- words) {
+        <dt>@word.word</dt>
+        <dd>@word.definition</dd>
+    }
+    </dl>
+    <p>Count: @words.length</p>
+}

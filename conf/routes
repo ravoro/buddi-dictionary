@@ -1,5 +1,6 @@
 GET         /                    controllers.HomeController.get
 
+GET         /words               controllers.WordController.getAll
 GET         /words/add           controllers.WordController.addGet
 POST        /words/add           controllers.WordController.addPost
 GET         /words/:word         controllers.WordController.get(word)

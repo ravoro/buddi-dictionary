@@ -39,4 +39,18 @@ class WordRepositorySpec extends PlaySpec {
       result mustBe expected
     }
   }
+
+  "getAll" must {
+    "return all records in db" in {
+      val result = buildRepository().getAll()
+      val expected = mockDb.toList.map { case (w, d) => Word(w, d) }
+      result mustBe expected
+    }
+
+    "return an empty list when there are no records in the db" in {
+      val result = buildRepository(Nil).getAll()
+      val expected = Nil
+      result mustBe expected
+    }
+  }
 }
