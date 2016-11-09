@@ -1,10 +1,11 @@
 @(words: List[Word])(implicit messages: Messages)
 
-@main(s"Words") {
+@main(s"All words") {
     <dl>
     @for(word <- words) {
         <dt>@word.word</dt>
         <dd>@word.definition</dd>
+        <dd><a href="@routes.WordController.get(word.word)">View details of @word.word</a></dd>
     }
     </dl>
     <p>Count: @words.length</p>
