@@ -7,9 +7,10 @@ lazy val root = (project in file("."))
 
 scalaVersion := "2.11.7"
 
-libraryDependencies += "org.jsoup" % "jsoup" % "1.10.1"
-libraryDependencies += "org.mockito" % "mockito-core" % "2.2.9"
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1"
-//libraryDependencies += jdbc
-//libraryDependencies += cache
-//libraryDependencies += ws
+
+libraryDependencies ++= Seq(
+  "org.jsoup" % "jsoup" % "1.10.1",
+  "org.mockito" % "mockito-core" % "2.2.9",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1",
+  "org.webjars" % "bootstrap" % "3.3.7"
+)

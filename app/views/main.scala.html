@@ -3,10 +3,19 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/non-responsive.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <title>@title | dict</title>
     </head>
     <body>
-        @header(title)
-        @content
+        @header()
+        <div class="container">
+            <h1>@title</h1>
+            @content
+        </div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="@routes.Assets.versioned("lib/bootstrap/js/bootstrap.min.js")" type="text/javascript"></script>
     </body>
 </html>
