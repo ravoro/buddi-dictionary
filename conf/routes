@@ -1,5 +1,7 @@
 GET         /                          controllers.HomeController.get
 
+POST        /searchbox                 controllers.SearchBoxController.search
+
 GET         /words                     controllers.WordController.getAll
 GET         /words/:word               controllers.WordController.get(word)
 GET         /words/:word/define        controllers.WordController.editForm(word)
