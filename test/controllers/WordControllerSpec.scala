@@ -12,83 +12,108 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import repositories.WordRepository
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 class WordControllerSpec extends PlaySpec with MockitoSugar {
   val mockMessagesApi = new DefaultMessagesApi(
     Environment.simple(),
     Configuration.reference,
     new DefaultLangs(Configuration.reference))
-  val mockRepo = mock[WordRepository]
 
-  def buildController(wordsRepo: WordRepository = mockRepo,
+  def buildController(wordsRepo: WordRepository = buildRepo(),
                       messagesApi: MessagesApi = mockMessagesApi) = {
     new WordController(messagesApi, wordsRepo)
+  }
+
+  def buildRepo(getResult: Option[Word] = None, upsertResult: Try[Unit] = Success(())) = {
+    val mockRepo = mock[WordRepository]
+    when(mockRepo.get(any())).thenReturn(getResult)
+    when(mockRepo.upsert(any(), any())).thenReturn(upsertResult)
+    mockRepo
   }
 
   val mockWord = Word("hello", "type of greeting")
 
   "editForm" must {
-    "return OK and display an empty word form if no custom definition exists" in {
-      val mockRepo = mock[WordRepository]
-      when(mockRepo.get(any())).thenReturn(None)
-      val result = buildController(mockRepo).editForm(mockWord.word)(FakeRequest())
+    "return 200 and display an empty word form if no custom definition exists" in {
+      val result = buildController().editForm(mockWord.word)(FakeRequest())
       status(result) mustBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      doc.getElementsByTag("textarea").size mustBe 1
-      doc.getElementsByTag("textarea").get(0).text() mustBe ""
+      doc.select("textarea").size mustBe 1
+      doc.select("textarea").get(0).text() mustBe ""
     }
 
-    "return OK and display an empty word form if a custom definition exists, but it is blank" in {
-      val mockRepo = mock[WordRepository]
-      when(mockRepo.get(any())).thenReturn(Some(mockWord.copy(definition = "")))
+    "return 200 and display an empty word form if a custom definition exists, but it is blank" in {
+      val mockRepo = buildRepo(getResult = Some(mockWord.copy(definition = "")))
       val result = buildController(mockRepo).editForm(mockWord.word)(FakeRequest())
       status(result) mustBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      doc.getElementsByTag("textarea").size mustBe 1
-      doc.getElementsByTag("textarea").get(0).text() mustBe ""
+      doc.select("textarea").size mustBe 1
+      doc.select("textarea").get(0).text() mustBe ""
     }
 
-    "return OK and display a prefilled form with the existing custom definition" in {
-      val mockRepo = mock[WordRepository]
-      when(mockRepo.get(any())).thenReturn(Some(mockWord))
+    "return 200 and display a prefilled form with the existing custom definition" in {
+      val mockRepo = buildRepo(getResult = Some(mockWord))
       val result = buildController(mockRepo).editForm(mockWord.word)(FakeRequest())
       status(result) mustBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      doc.getElementsByTag("textarea").size mustBe 1
-      doc.getElementsByTag("textarea").get(0).text() mustBe mockWord.definition
+      doc.select("textarea").size mustBe 1
+      doc.select("textarea").get(0).text() mustBe mockWord.definition
     }
   }
 
   "edit" must {
     val mockFormData = Map("definition" -> mockWord.definition)
 
-    "return OK, upsert the word to db and redirect to the newly created word's page" in {
-      val mockRepo = mock[WordRepository]
-      when(mockRepo.upsert(any(), any())).thenReturn(Try(()))
+    "return 200, upsert the word to db and redirect to the newly created word's page" in {
+      val mockRepo = buildRepo()
       val request = FakeRequest().withFormUrlEncodedBody(mockFormData.toSeq: _*)
-      val result = buildController(wordsRepo = mockRepo).edit(mockWord.word)(request)
+      val result = buildController(mockRepo).edit(mockWord.word)(request)
       status(result) mustBe SEE_OTHER
       verify(mockRepo).upsert(mockWord.word, mockFormData("definition"))
       await(result).header.headers("Location") mustBe routes.WordController.get(mockWord.word).url
       flash(result).get("message") mustBe Some(s"""Successfully updated definition of "${mockWord.word}".""")
     }
 
-    "return BAD_REQUEST and display the edit form with errors when an invalid submission is made" in {
+    "return 400 and display the edit form with errors when an invalid submission is made" in {
       pending
     }
 
-    "return INTERNAL_SERVER_ERROR and redisplay the form with an error when an error occurs during saving" in {
-      val mockRepo = mock[WordRepository]
-      when(mockRepo.upsert(any(), any())).thenReturn(Failure(new Exception))
+    "return 500 and redisplay the form with an error when an error occurs during saving" in {
+      val mockRepo = buildRepo(upsertResult = Failure(new Exception))
       val request = FakeRequest().withFormUrlEncodedBody(mockFormData.toSeq: _*)
-      val result = buildController(wordsRepo = mockRepo).edit(mockWord.word)(request)
+      val result = buildController(mockRepo).edit(mockWord.word)(request)
       status(result) mustBe INTERNAL_SERVER_ERROR
       verify(mockRepo).upsert(mockWord.word, mockFormData("definition"))
       val doc = Jsoup.parse(contentAsString(result))
-      doc.getElementById("edit-form") must not be null
-      doc.getElementsByClass("alert-danger").size mustBe 1
-      doc.getElementsByClass("alert-danger").get(0).text mustBe "Error occurred while saving, please try again."
+      doc.select("#edit-form").size mustBe 1
+      doc.select(".alert-danger").size mustBe 1
+      doc.select(".alert-danger").get(0).text mustBe "Error occurred while saving, please try again."
+    }
+  }
+
+  "get" must {
+    "return 200 and display the custom definition for the word" in {
+      val mockRepo = buildRepo(getResult = Some(mockWord))
+      val result = buildController(mockRepo).get(mockWord.word)(FakeRequest())
+      status(result) mustBe OK
+      val doc = Jsoup.parse(contentAsString(result))
+      doc.select("#custom-definition-panel .panel-body").text mustBe mockWord.definition
+    }
+
+    "return 200 and display a message stating that no custom definition exists" in {
+      val result = buildController().get(mockWord.word)(FakeRequest())
+      status(result) mustBe OK
+      val doc = Jsoup.parse(contentAsString(result))
+      doc.select("#custom-definition-panel .no-definition").size mustBe 1
+    }
+
+    "display an alert with a flash message" in {
+      val request = FakeRequest().withFlash("message" -> "hello world")
+      val result = buildController().get(mockWord.word)(request)
+      val doc = Jsoup.parse(contentAsString(result))
+      doc.select(".alert-success").size mustBe 1
+      doc.select(".alert-success").get(0).text mustBe request.flash.get("message").get
     }
   }
 }
