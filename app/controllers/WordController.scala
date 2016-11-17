@@ -2,11 +2,10 @@ package controllers
 
 import javax.inject._
 
-import forms.WordForm.addForm
+import forms.WordForm.{form => wordForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import repositories.WordRepository
-import repositories.WordRepository.DuplicateRecordException
 
 import scala.util.{Failure, Success}
 
@@ -14,20 +13,26 @@ import scala.util.{Failure, Success}
 class WordController @Inject()(val messagesApi: MessagesApi,
                                val wordsRepo: WordRepository) extends Controller with I18nSupport {
 
-  def addGet() = Action { implicit request =>
-    Ok(views.html.wordAdd(addForm))
+  def editForm(word: String) = Action { implicit request =>
+    val form = wordsRepo.get(word).fold(wordForm(word))(wordForm(word).fill)
+    Ok(views.html.wordForm(word, form))
   }
 
-  def addPost() = Action { implicit request =>
-    addForm.bindFromRequest.fold(
+  def edit(word: String) = Action { implicit request =>
+    wordForm(word).bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.wordAdd(formWithErrors))
+        BadRequest(views.html.wordForm(word, formWithErrors))
       },
       submission => {
-        wordsRepo.add(submission.word, submission.definition) match {
-          case Success(_) => Redirect(routes.WordController.get(submission.word))
-          case Failure(e: DuplicateRecordException) => BadRequest(views.html.wordAdd(addForm)).flashing("msggg" -> "wordalreadyexists")
-          case Failure(e) => throw e
+        wordsRepo.upsert(submission.word, submission.definition) match {
+          case Success(_) => {
+            Redirect(routes.WordController.get(submission.word))
+              .flashing("message" -> s"""Successfully updated definition of "$word".""")
+          }
+          case Failure(e) => {
+            val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
+            InternalServerError(views.html.wordForm(word, formWithError))
+          }
         }
       }
     )

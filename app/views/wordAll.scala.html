@@ -1,6 +1,6 @@
 @(words: List[Word])(implicit messages: Messages)
 
-@main(s"All words") {
+@base(s"All words") {
     <dl>
     @for(word <- words) {
         <dt>@word.word</dt>

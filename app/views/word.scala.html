@@ -1,6 +1,6 @@
 @(word: Word)(implicit messages: Messages)
 
-@main(s"Word: ${word.word}") {
+@base(s"Word: ${word.word}") {
     <dl>
         <dt>@word.word</dt>
         <dd>@word.definition</dd>

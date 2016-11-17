@@ -10,20 +10,8 @@ class WordRepositorySpec extends PlaySpec {
 
   def buildRepository(records: List[(String, String)] = mockDb.toList) = {
     val repo = new WordRepository()
-    records.foreach { case (word, definition) => repo.add(word, definition) }
+    records.foreach { case (word, definition) => repo.upsert(word, definition) }
     repo
-  }
-
-  "add" must {
-    "return Success when adding a new word" in {
-      val result = buildRepository().add("hello", "a form of greeting")
-      result.isSuccess mustBe true
-    }
-
-    "return Failure when adding an existing word" in {
-      val result = buildRepository().add("apple", "random definition")
-      result.isFailure mustBe true
-    }
   }
 
   "get" must {
@@ -51,6 +39,22 @@ class WordRepositorySpec extends PlaySpec {
       val result = buildRepository(Nil).getAll()
       val expected = Nil
       result mustBe expected
+    }
+  }
+
+  "upsert" must {
+    "return Success when adding a new word" in {
+      val result = buildRepository().upsert("hello", "a form of greeting")
+      result.isSuccess mustBe true
+    }
+
+    "return Success when adding an existing word" in {
+      val result = buildRepository().upsert("apple", "random definition")
+      result.isSuccess mustBe true
+    }
+
+    "return Failure when an error occurs while upserting a word" in {
+      pending
     }
   }
 }

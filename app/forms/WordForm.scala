@@ -2,14 +2,14 @@ package forms
 
 import models.Word
 import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.data.Forms._
 
 
 object WordForm {
-  val addForm = Form(
+  def form(word: String): Form[Word] = Form(
     mapping(
-      "word" -> nonEmptyText,
-      "definition" -> nonEmptyText
+      "word" -> ignored(word),
+      "definition" -> text
     )(Word.apply)(Word.unapply)
   )
 }
