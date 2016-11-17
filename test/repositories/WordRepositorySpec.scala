@@ -26,6 +26,13 @@ class WordRepositorySpec extends PlaySpec {
       val expected = None
       result mustBe expected
     }
+
+    "return None when a record exists, but the definition is empty" in {
+      val db = mockDb + ("hello" -> "")
+      val result = buildRepository(db.toList).get("hello")
+      val expected = None
+      result mustBe expected
+    }
   }
 
   "getAll" must {

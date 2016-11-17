@@ -10,7 +10,10 @@ import scala.util.Try
 class WordRepository {
   val db = collection.mutable.Map[String, String]()
 
-  def get(word: String): Option[Word] = db.get(word).map(definition => Word(word, definition))
+  def get(word: String): Option[Word] = db.get(word).flatMap { definition =>
+    if (definition.isEmpty) None
+    else Some(Word(word, definition))
+  }
 
   def getAll(): List[Word] = db.toList.map { case (w, d) => Word(w, d) }
 

@@ -38,11 +38,9 @@ class WordController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  def get(word: String) = Action {
-    wordsRepo.get(word) match {
-      case Some(w) => Ok(views.html.word(w))
-      case _ => NotFound
-    }
+  def get(word: String) = Action { implicit request =>
+    val wordOpt = wordsRepo.get(word)
+    Ok(views.html.word(word, wordOpt))
   }
 
   def getAll() = Action {
