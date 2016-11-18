@@ -7,10 +7,12 @@ lazy val root = (project in file("."))
 
 scalaVersion := "2.11.7"
 
-
 libraryDependencies ++= Seq(
+  "com.adrianhurt" %% "play-bootstrap" % "1.1-P25-B3",
+  "com.typesafe.play" %% "play-slick" % "2.0.0",
+  "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
+  "mysql" % "mysql-connector-java" % "5.1.36",
   "org.jsoup" % "jsoup" % "1.10.1",
   "org.mockito" % "mockito-core" % "2.2.9",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1",
-  "com.adrianhurt" %% "play-bootstrap" % "1.1-P25-B3"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1"
 )
