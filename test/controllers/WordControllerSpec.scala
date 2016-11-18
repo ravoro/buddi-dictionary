@@ -12,6 +12,7 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import repositories.WordRepository
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 class WordControllerSpec extends PlaySpec with MockitoSugar {
@@ -27,8 +28,8 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
 
   def buildRepo(getResult: Option[Word] = None, upsertResult: Try[Unit] = Success(())) = {
     val mockRepo = mock[WordRepository]
-    when(mockRepo.get(any())).thenReturn(getResult)
-    when(mockRepo.upsert(any(), any())).thenReturn(upsertResult)
+    when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
+    when(mockRepo.upsert(any(), any())).thenReturn(Future.successful(upsertResult))
     mockRepo
   }
 
