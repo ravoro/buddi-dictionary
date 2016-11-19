@@ -1,34 +1,39 @@
-@(word: String, wordOpt: Option[Word])(implicit flash: Flash, messages: Messages)
+@(word: String, customOpt: Option[Word], wikiOpt: Option[String])(implicit flash: Flash, messages: Messages)
 
 @css = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/word.css")">
 }
 
+@panel(id: String, source: String, definitionOpt: Option[String])(actions: Html = Html("")) = {
+    <div id="@id" class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-xs-6">
+                    <h3 class="panel-title">@source</h3>
+                </div>
+                <div class="col-xs-6">
+                    <div class="panel-actions">@actions</div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body">
+        @definitionOpt.fold {
+            <em class="no-definition">No definition found.</em>
+        } { definition =>
+            @Html(definition)
+        }
+        </div>
+    </div>
+}
 
 @base(s"$word", css = css) {
     @flash.get("message").fold(Html("")) { msg =>
         <div class="alert alert-success" role="alert">@msg</div>
     }
 
-    <div id="custom-definition-panel" class="panel panel-default">
-        <div class="panel-heading">
-            <div class="row">
-                <div class="col-xs-6">
-                    <h3 class="panel-title">Custom definition</h3>
-                </div>
-                <div class="col-xs-6">
-                    <div class="panel-actions">
-                        <a href="@routes.WordController.editForm(word)">edit</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="panel-body">
-        @wordOpt.fold {
-            <em class="no-definition">No custom definition exists.</em>
-        } { wordRecord =>
-            <span>@wordRecord.definition</span>
-        }
-        </div>
-    </div>
+    @panel("custom-definition-panel", "Custom definition", customOpt.map(_.definition)) {
+        <a href="@routes.WordController.editForm(word)">edit</a>
+    }
+
+    @panel("wiki-definition-panel", "Wiktionary", wikiOpt)()
 }

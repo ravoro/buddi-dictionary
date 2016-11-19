@@ -14,5 +14,6 @@ libraryDependencies ++= Seq(
   "mysql" % "mysql-connector-java" % "5.1.36",
   "org.jsoup" % "jsoup" % "1.10.1",
   "org.mockito" % "mockito-core" % "2.2.9",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1",
+  "ws"
 )
