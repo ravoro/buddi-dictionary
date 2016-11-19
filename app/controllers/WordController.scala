@@ -6,6 +6,7 @@ import forms.WordForm.{form => wordForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import repositories.WordRepository
+import sources.WiktionarySource
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -13,6 +14,7 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class WordController @Inject()(val messagesApi: MessagesApi,
+                               val wikiSource: WiktionarySource,
                                val wordsRepo: WordRepository) extends Controller with I18nSupport {
 
   def editForm(word: String) = Action.async { implicit request =>
@@ -43,9 +45,10 @@ class WordController @Inject()(val messagesApi: MessagesApi,
   }
 
   def get(word: String) = Action.async { implicit request =>
-    wordsRepo.get(word).map { wordOpt =>
-      Ok(views.html.word(word, wordOpt))
-    }
+    for {
+      customOpt <- wordsRepo.get(word)
+      wikiOpt <- wikiSource.get(word)
+    } yield Ok(views.html.word(word, customOpt, wikiOpt))
   }
 
   def getAll() = Action.async {
