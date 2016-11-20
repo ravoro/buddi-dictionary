@@ -29,11 +29,11 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
   def buildRepo(getResult: Option[Word] = None, upsertResult: Try[Unit] = Success(())) = {
     val mockRepo = mock[WordRepository]
     when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
-    when(mockRepo.upsert(any(), any())).thenReturn(Future.successful(upsertResult))
+    when(mockRepo.upsert(any())).thenReturn(Future.successful(upsertResult))
     mockRepo
   }
 
-  val mockWord = Word("hello", "type of greeting")
+  val mockWord = Word(None, "hello", "type of greeting")
 
   "editForm" must {
     "return 200 and display an empty word form if no custom definition exists" in {

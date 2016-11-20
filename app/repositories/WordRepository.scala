@@ -18,11 +18,13 @@ class WordRepository @Inject()(dbConfigProvider: DatabaseConfigProvider) {
   import dbConfig.driver.api._
 
   private class WordsTable(tag: Tag) extends Table[Word](tag, "words") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
     def word = column[String]("word")
 
     def definition = column[String]("definition")
 
-    def * = (word, definition) <> (Word.tupled, Word.unapply)
+    def * = (id.?, word, definition) <> (Word.tupled, Word.unapply)
   }
 
   private val words = TableQuery[WordsTable]
@@ -35,8 +37,8 @@ class WordRepository @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     words.result
   }
 
-  def upsert(word: String, definition: String): Future[Try[Unit]] = db.run {
-    words.insertOrUpdate(Word(word, definition)).map { rows =>
+  def upsert(word: Word): Future[Try[Unit]] = db.run {
+    words.insertOrUpdate(word).map { rows =>
       if (rows > 0) Success(Unit)
       else Failure(new Exception(s"Failed to upsert '$word'"))
     }
