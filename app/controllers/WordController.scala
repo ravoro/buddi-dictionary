@@ -3,6 +3,7 @@ package controllers
 import javax.inject._
 
 import forms.WordForm.{form => wordForm}
+import models.Word
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import repositories.WordRepository
@@ -30,14 +31,18 @@ class WordController @Inject()(val messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.wordForm(word, formWithErrors)))
       },
       submission => {
-        wordsRepo.upsert(submission.word, submission.definition).map {
-          case Success(_) => {
-            Redirect(routes.WordController.get(submission.word))
-              .flashing("message" -> s"""Successfully updated definition of "$word".""")
-          }
-          case Failure(e) => {
-            val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
-            InternalServerError(views.html.wordForm(word, formWithError))
+        wordsRepo.get(word).flatMap { wordOpt =>
+          val idOpt = wordOpt.flatMap(_.id)
+          val newRecord = Word(idOpt, submission.word, submission.definition)
+          wordsRepo.upsert(newRecord).map {
+            case Success(_) => {
+              Redirect(routes.WordController.get(submission.word))
+                .flashing("message" -> s"""Successfully updated definition of "$word".""")
+            }
+            case Failure(e) => {
+              val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
+              InternalServerError(views.html.wordForm(word, formWithError))
+            }
           }
         }
       }

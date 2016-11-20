@@ -1,3 +1,3 @@
 package models
 
-case class Word(word: String, definition: String)
+case class Word(id: Option[Long], word: String, definition: String)
