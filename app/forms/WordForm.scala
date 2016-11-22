@@ -10,7 +10,7 @@ object WordForm {
     mapping(
       "id" -> optional(longNumber),
       "word" -> ignored(word),
-      "definition" -> text
+      "definitions" -> seqTextNewLineSeparated
     )(Word.apply)(Word.unapply)
   )
 }
