@@ -8,7 +8,7 @@ case class SearchBox(query: String)
 object SearchBoxForm {
   val form = Form(
     mapping(
-      "query" -> text
+      "query" -> text.transform[String](_.trim, _.toString)
     )(SearchBox.apply)(SearchBox.unapply)
   )
 }
