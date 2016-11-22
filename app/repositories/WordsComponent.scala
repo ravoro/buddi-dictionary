@@ -21,8 +21,8 @@ trait WordsComponent {
 
   val words = TableQuery[WordsTable]
 
-  def insertWordRecord(word: String): Future[WordRecord] = {
-    val query = (words returning words) += WordRecord(None, word)
+  def insertWordRecord(word: String): Future[Long] = {
+    val query = (words returning words.map(_.id)) += WordRecord(None, word)
     db.run(query)
   }
 }
