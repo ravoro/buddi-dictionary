@@ -56,8 +56,8 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     def getOrInitialize(word: String): Future[Word] = {
       get(word).flatMap { wordOpt =>
         wordOpt.fold {
-          insertWordRecord(word).map { w =>
-            Word(w.id, w.word, Seq())
+          insertWordRecord(word).map { id =>
+            Word(Some(id), word, Seq())
           }
         }(Future.successful(_))
       }
