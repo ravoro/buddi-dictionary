@@ -11,7 +11,7 @@
                 <li><a href="@routes.WordController.getAll">All words</a></li>
             </ul>
             @b3.form(routes.SearchBoxController.search, 'class -> "navbar-form navbar-right") {
-                @b3.text(searchBoxForm("query"), 'placeholder -> "Search")
+                @b3.text(searchBoxForm("query"), 'placeholder -> "Search", 'autofocus -> "autofocus")
                 @b3.submit('class -> "btn btn-default") {Search}
             }
         </div>
