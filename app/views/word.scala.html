@@ -4,7 +4,7 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/word.css")">
 }
 
-@panel(id: String, source: String, definitionOpt: Option[String])(actions: Html = Html("")) = {
+@panel(id: String, source: String, definitions: Seq[String])(actions: Html = Html("")) = {
     <div id="@id" class="panel panel-default">
         <div class="panel-heading">
             <div class="row">
@@ -17,10 +17,10 @@
             </div>
         </div>
         <div class="panel-body">
-        @definitionOpt.fold {
+        @if(definitions.isEmpty) {
             <em class="no-definition">No definition found.</em>
-        } { definition =>
-            @Html(definition)
+        } else {
+            @Html(definitions.mkString(", "))
         }
         </div>
     </div>
@@ -31,9 +31,9 @@
         <div class="alert alert-success" role="alert">@msg</div>
     }
 
-    @panel("custom-definition-panel", "Custom definition", customOpt.map(_.definition)) {
+    @panel("custom-definition-panel", "Custom definition", customOpt.toSeq.flatMap(_.definitions)) {
         <a href="@routes.WordController.editForm(word)">edit</a>
     }
 
-    @panel("wiki-definition-panel", "Wiktionary", wikiOpt)()
+    @panel("wiki-definition-panel", "Wiktionary", wikiOpt.toSeq)()
 }

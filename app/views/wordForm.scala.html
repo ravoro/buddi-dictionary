@@ -14,7 +14,7 @@
     }
 
     @b3.form(action = routes.WordController.edit(word), 'id -> "edit-form") {
-        @b3.textarea(wordForm("definition"))
+        @b3.textarea(wordForm("definitions"))
         @b3.submit('class -> "btn btn-default") {Save}
     }
 }

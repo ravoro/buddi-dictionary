@@ -6,7 +6,7 @@ import forms.WordForm.{form => wordForm}
 import models.Word
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import repositories.WordRepository
+import repositories.WordsRepository
 import sources.WiktionarySource
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,7 +16,7 @@ import scala.util.{Failure, Success}
 @Singleton
 class WordController @Inject()(val messagesApi: MessagesApi,
                                val wikiSource: WiktionarySource,
-                               val wordsRepo: WordRepository) extends Controller with I18nSupport {
+                               val wordsRepo: WordsRepository) extends Controller with I18nSupport {
 
   def editForm(word: String) = Action.async { implicit request =>
     wordsRepo.get(word).map { wordOpt =>
@@ -31,18 +31,16 @@ class WordController @Inject()(val messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.wordForm(word, formWithErrors)))
       },
       submission => {
-        wordsRepo.get(word).flatMap { wordOpt =>
-          val idOpt = wordOpt.flatMap(_.id)
-          val newRecord = Word(idOpt, submission.word, submission.definition)
-          wordsRepo.upsert(newRecord).map {
-            case Success(_) => {
-              Redirect(routes.WordController.get(submission.word))
-                .flashing("message" -> s"""Successfully updated definition of "$word".""")
-            }
-            case Failure(e) => {
-              val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
-              InternalServerError(views.html.wordForm(word, formWithError))
-            }
+        val newWord = Word(None, submission.word, submission.definitions)
+        wordsRepo.upsert(newWord).map {
+          case Success(_) => {
+            Redirect(routes.WordController.get(submission.word))
+              .flashing("message" -> s"""Successfully updated definition of "$word".""")
+          }
+          case Failure(e) => {
+            println(s"Failed to save word: ${e.getMessage}")
+            val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
+            InternalServerError(views.html.wordForm(word, formWithError))
           }
         }
       }
