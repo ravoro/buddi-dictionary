@@ -7,7 +7,7 @@ package object forms {
       data.get(key).fold[Either[Seq[FormError], Seq[String]]] {
         Left(Seq(FormError(key, "error.required", Nil)))
       } { value =>
-        Right(value.split("\n").map(_.stripLineEnd).toSeq)
+        Right(value.split("\n").map(_.trim).filter(_.nonEmpty).toSeq)
       }
     }
 
