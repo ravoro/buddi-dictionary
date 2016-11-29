@@ -11,7 +11,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import repositories.WordsRepository
-import sources.WiktionarySource
+import sources.{WiktionarySource, YandexDictionarySource, YandexTranslateSource}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -24,14 +24,10 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
 
   def buildController(wordsRepo: WordsRepository = buildWordsRepo(),
                       wikiRepo: WiktionarySource = buildWikiRepo(),
+                      yandexTransRepo: YandexTranslateSource = buildYandexTranRepo(),
+                      yandexDictRepo: YandexDictionarySource = buildYandexDictRepo(),
                       messagesApi: MessagesApi = mockMessagesApi) = {
-    new WordController(messagesApi, wikiRepo, wordsRepo)
-  }
-
-  def buildWikiRepo(getResult: Option[String] = None) = {
-    val mockRepo = mock[WiktionarySource]
-    when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
-    mockRepo
+    new WordController(messagesApi, wikiRepo, yandexTransRepo, yandexDictRepo, wordsRepo)
   }
 
   def buildWordsRepo(getResult: Option[Word] = None, upsertResult: Try[Unit] = Success(())) = {
@@ -40,6 +36,25 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
     when(mockRepo.upsert(any())).thenReturn(Future.successful(upsertResult))
     mockRepo
   }
+
+  def buildWikiRepo(getResult: Option[String] = None) = {
+    val mockRepo = mock[WiktionarySource]
+    when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
+    mockRepo
+  }
+
+  def buildYandexTranRepo(getResult: Option[String] = None) = {
+    val mockRepo = mock[YandexTranslateSource]
+    when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
+    mockRepo
+  }
+
+  def buildYandexDictRepo(getResult: Option[String] = None) = {
+    val mockRepo = mock[YandexDictionarySource]
+    when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
+    mockRepo
+  }
+
 
   val mockWord = Word(None, "hello", Seq("hey", "type of greeting"))
 
