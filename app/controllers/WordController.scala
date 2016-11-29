@@ -33,7 +33,7 @@ class WordController @Inject()(val messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.wordForm(word, formWithErrors)))
       },
       submission => {
-        val newWord = Word(None, submission.word, submission.definitions)
+        val newWord = Word(None, submission.word, submission.lang, submission.definitions)
         wordsRepo.upsert(newWord).map {
           case Success(_) => {
             Redirect(routes.WordController.get(submission.word))

@@ -3,7 +3,7 @@
 @base(s"All words") {
     <dl>
     @for(word <- words) {
-        <dt>@word.word</dt>
+        <dt>@word.word <em>(@word.lang)</em></dt>
         <dd>@word.definitions.mkString(", ")</dd>
         <dd><a href="@routes.WordController.get(word.word)">View details of @word.word</a></dd>
     }
