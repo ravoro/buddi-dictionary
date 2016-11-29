@@ -1,10 +1,14 @@
-@(word: String, customOpt: Option[Word], wikiOpt: Option[String])(implicit flash: Flash, messages: Messages)
+@(word: String,
+        customOpt: Option[Word],
+        wikiOpt: Option[String],
+        yandexTransOpt: Option[String],
+        yandexDictOpt: Option[String])(implicit flash: Flash, messages: Messages)
 
 @css = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/word.css")">
 }
 
-@panel(id: String, source: String, definitions: Seq[String])(actions: Html = Html("")) = {
+@panel(id: String, source: String, definitionsOpt: Option[String], definitionsAsHTML: Boolean = false)(actions: Html = Html("")) = {
     <div id="@id" class="panel panel-default">
         <div class="panel-heading">
             <div class="row">
@@ -17,10 +21,14 @@
             </div>
         </div>
         <div class="panel-body">
-        @if(definitions.isEmpty) {
+        @definitionsOpt.fold {
             <em class="no-definition">No definition found.</em>
-        } else {
-            @Html(definitions.mkString(", "))
+        } { definitions =>
+            @if(definitionsAsHTML) {
+                @Html(definitions)
+            } else {
+                @definitions
+            }
         }
         </div>
     </div>
@@ -31,9 +39,13 @@
         <div class="alert alert-success" role="alert">@msg</div>
     }
 
-    @panel("custom-definition-panel", "Custom definition", customOpt.toSeq.flatMap(_.definitions)) {
+    @panel("custom-definition-panel", "Custom definition", customOpt.map(_.definitions.mkString(", "))) {
         <a href="@routes.WordController.editForm(word)">edit</a>
     }
 
-    @panel("wiki-definition-panel", "Wiktionary", wikiOpt.toSeq)()
+    @panel("wiktionary-definition-panel", "Wiktionary", wikiOpt, definitionsAsHTML = true)()
+
+    @panel("yandex-translate-definition-panel", "Yandex Translate", yandexTransOpt)()
+
+    @panel("yandex-dictionary-definition-panel", "Yandex Dictionary", yandexDictOpt)()
 }

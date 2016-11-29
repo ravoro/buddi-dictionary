@@ -7,7 +7,7 @@ import models.Word
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import repositories.WordsRepository
-import sources.WiktionarySource
+import sources.{WiktionarySource, YandexDictionarySource, YandexTranslateSource}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -15,7 +15,9 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class WordController @Inject()(val messagesApi: MessagesApi,
-                               val wikiSource: WiktionarySource,
+                               val wiktionarySource: WiktionarySource,
+                               val yandexTranslateSource: YandexTranslateSource,
+                               val yandexDictionarySource: YandexDictionarySource,
                                val wordsRepo: WordsRepository) extends Controller with I18nSupport {
 
   def editForm(word: String) = Action.async { implicit request =>
@@ -50,8 +52,10 @@ class WordController @Inject()(val messagesApi: MessagesApi,
   def get(word: String) = Action.async { implicit request =>
     for {
       customOpt <- wordsRepo.get(word)
-      wikiOpt <- wikiSource.get(word)
-    } yield Ok(views.html.word(word, customOpt, wikiOpt))
+      wikiOpt <- wiktionarySource.get(word)
+      yandexTransOpt <- yandexTranslateSource.get(word)
+      yandexDictOpt <- yandexDictionarySource.get(word)
+    } yield Ok(views.html.word(word, customOpt, wikiOpt, yandexTransOpt, yandexDictOpt))
   }
 
   def getAll() = Action.async {
