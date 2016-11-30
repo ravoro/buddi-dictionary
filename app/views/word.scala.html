@@ -8,7 +8,7 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/word.css")">
 }
 
-@panel(id: String, source: String, definitionsOpt: Option[String], definitionsAsHTML: Boolean = false)(actions: Html = Html("")) = {
+@panel(id: String, source: String, definitionsOpt: Option[Html])(actions: Html = Html("")) = {
     <div id="@id" class="panel panel-default">
         <div class="panel-heading">
             <div class="row">
@@ -24,14 +24,33 @@
         @definitionsOpt.fold {
             <em class="no-definition">No definition found.</em>
         } { definitions =>
-            @if(definitionsAsHTML) {
-                @Html(definitions)
-            } else {
-                @definitions
-            }
+            @definitions
         }
         </div>
     </div>
+}
+
+@asString(str: String) = {
+@str
+}
+
+@asHTML(str: String) = {
+@Html(str)
+}
+
+@definition(d: WordDefinition) = {
+@d.definition (<em>@d.lang</em>)
+}
+
+@asCustomDef(word: Word) = {
+    <dl>
+    @for((lang, defs) <- word.defsToMap) {
+        <dt>@lang</dt>
+        <dd>
+        @(defs.mkString(", "))
+        </dd>
+    }
+    </dl>
 }
 
 @base(s"$word", css = css) {
@@ -39,13 +58,13 @@
         <div class="alert alert-success" role="alert">@msg</div>
     }
 
-    @panel("custom-definition-panel", "Custom definition", customOpt.map(_.definitions.mkString(", "))) {
+    @panel("custom-definition-panel", "Custom definition", customOpt.map(asCustomDef)) {
         <a href="@routes.WordController.editForm(word)">edit</a>
     }
 
-    @panel("wiktionary-definition-panel", "Wiktionary", wikiOpt, definitionsAsHTML = true)()
+    @panel("wiktionary-definition-panel", "Wiktionary", wikiOpt.map(asHTML))()
 
-    @panel("yandex-translate-definition-panel", "Yandex Translate", yandexTransOpt)()
+    @panel("yandex-translate-definition-panel", "Yandex Translate", yandexTransOpt.map(asString))()
 
-    @panel("yandex-dictionary-definition-panel", "Yandex Dictionary", yandexDictOpt)()
+    @panel("yandex-dictionary-definition-panel", "Yandex Dictionary", yandexDictOpt.map(asString))()
 }

@@ -15,7 +15,9 @@ CREATE TABLE words (
 CREATE TABLE definitions (
   wid        INTEGER      NOT NULL,
   definition VARCHAR(255) NOT NULL,
-  FOREIGN KEY (wid) REFERENCES words (id)
+  lang       VARCHAR(2)   NOT NULL,
+  FOREIGN KEY (wid) REFERENCES words (id),
+  FOREIGN KEY (lang) REFERENCES languages (code)
 );
 
 # --- !Downs

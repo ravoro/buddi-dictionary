@@ -15,7 +15,7 @@ object WordForm {
       "lang" -> nonEmptyText.verifying(
         s"Language needs to be one of (${validLanguages.mkString(", ")})",
         s => validLanguages.contains(s)),
-      "definitions" -> seqTextNewLineSeparated
+      "definitions" -> definitions
     )(Word.apply)(Word.unapply)
   )
 }

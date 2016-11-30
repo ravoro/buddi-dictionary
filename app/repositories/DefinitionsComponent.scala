@@ -1,5 +1,6 @@
 package repositories
 
+import models.WordDefinition
 import models.db.DefinitionRecord
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.driver.JdbcProfile
@@ -18,17 +19,19 @@ trait DefinitionsComponent extends WordsComponent {
 
     def definition = column[String]("definition")
 
-    def * = (wid, definition) <> (DefinitionRecord.tupled, DefinitionRecord.unapply)
+    def lang = column[String]("lang")
+
+    def * = (wid, definition, lang) <> (DefinitionRecord.tupled, DefinitionRecord.unapply)
 
     def word = foreignKey("fk_words", wid, words)(_.id)
   }
 
   val definitions = TableQuery[DefinitionsTable]
 
-  def insertDefinitionRecordBatch(wordID: Long, defs: Set[String]): Future[Try[Unit]] = {
+  def insertDefinitionRecordBatch(wordID: Long, defs: Set[WordDefinition]): Future[Try[Unit]] = {
     if (defs.isEmpty) Future.successful(Success(Unit))
     else {
-      val defsRecords = defs.map(DefinitionRecord(wordID, _))
+      val defsRecords = defs.map(d => DefinitionRecord(wordID, d.definition, d.lang))
       val query = definitions ++= defsRecords
       db.run(query).map {
         case Some(x) if x > 0 => Success(Unit)
@@ -37,10 +40,13 @@ trait DefinitionsComponent extends WordsComponent {
     }
   }
 
-  def deleteDefinitionRecordBatch(wordID: Long, defs: Set[String]): Future[Try[Unit]] = {
+  def deleteDefinitionRecordBatch(wordID: Long, defs: Set[WordDefinition]): Future[Try[Unit]] = {
     if (defs.isEmpty) Future.successful(Success(Unit))
     else {
-      val query = definitions.filter(record => record.wid === wordID && record.definition.inSet(defs))
+      // !!!
+      // TODO: currently deleting based on wid+definition (not considering lang!). Assuming all definitions unique (i.e. no same word in diff langs)
+      // !!!
+      val query = definitions.filter(rec => rec.wid === wordID && rec.definition.inSet(defs.map(_.definition)))
       db.run(query.delete).map {
         case count if count > 0 => Success(Unit)
         case _ => Failure(new Exception(s"Failed to delete definitions ($defs) for word id=$wordID"))

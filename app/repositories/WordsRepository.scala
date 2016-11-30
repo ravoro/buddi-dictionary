@@ -2,8 +2,8 @@ package repositories
 
 import javax.inject._
 
-import models.Word
 import models.db.{DefinitionRecord, WordRecord}
+import models.{Word, WordDefinition}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.driver.JdbcProfile
 
@@ -17,10 +17,12 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 
   import driver.api._
 
-  private def rowsToMap(rows: Seq[(WordRecord, Option[DefinitionRecord])]): Map[Long, Word] = {
+  private def rowsToMap(rows: List[(WordRecord, Option[DefinitionRecord])]): Map[Long, Word] = {
     val mapRecordsByWord = rows.groupBy(_._1)
     val mapDefsByWord = mapRecordsByWord.map { case (word, records) => (word, records.flatMap(_._2)) }
-    val mapWordsById = mapDefsByWord.map { case (w, d) => (w.id.get, Word(w.id, w.word, w.lang, d.map(_.definition))) }
+    val mapWordsById = mapDefsByWord.map {
+      case (w, d) => (w.id.get, Word(w.id, w.word, w.lang, d.map(rec => WordDefinition(rec.definition, rec.lang))))
+    }
     mapWordsById
   }
 
@@ -35,7 +37,7 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 
     for {
       rows <- db.run(query.result)
-    } yield findWordByName(rowsToMap(rows), word)
+    } yield findWordByName(rowsToMap(rows.toList), word)
   }
 
   def getAll(): Future[Seq[Word]] = {
@@ -45,7 +47,7 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 
     for {
       rows <- db.run(query.result)
-    } yield rowsToMap(rows).values.toSeq
+    } yield rowsToMap(rows.toList).values.toSeq
   }
 
   def upsert(word: Word): Future[Try[Unit]] = {
@@ -57,13 +59,13 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
       get(word).flatMap { wordOpt =>
         wordOpt.fold {
           insertWordRecord(word, lang).map { id =>
-            Word(Some(id), word, lang, Seq())
+            Word(Some(id), word, lang, List())
           }
         }(Future.successful(_))
       }
     }
 
-    def splitDefinitions(oldWord: Word, newWord: Word): (Set[String], Set[String], Set[String]) = {
+    def splitDefinitions(oldWord: Word, newWord: Word): (Set[WordDefinition], Set[WordDefinition], Set[WordDefinition]) = {
       val oldDefs = oldWord.definitions.toSet
       val newDefs = word.definitions.toSet
       val toRemain = oldDefs intersect newDefs
@@ -74,13 +76,14 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     }
 
     // TODO: needs to be a transaction
+    // TODO: word needs to be deleted if toRemain.isEmpty
     for {
       oldWord <- getOrInitialize(word.word, word.lang)
       wordID = oldWord.id.get
       (toRemain, toDelete, toInsert) = splitDefinitions(oldWord, word)
-      wordMetaResult <- updateWordRecord(wordID, word.word, word.lang)
-      insertResult <- insertDefinitionRecordBatch(wordID, toInsert)
       deleteResult <- deleteDefinitionRecordBatch(wordID, toDelete)
+      insertResult <- insertDefinitionRecordBatch(wordID, toInsert)
+      wordMetaResult <- updateWordRecord(wordID, word.word, word.lang)
     } yield {
       if (wordMetaResult.isSuccess && insertResult.isSuccess && deleteResult.isSuccess) {
         Success(Unit)
