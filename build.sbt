@@ -17,3 +17,8 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % "2.2.9",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1"
 )
+
+coverageExcludedPackages := "<empty>;router\\..*;views\\..*;repositories\\..*Table"
+coverageMinimum := 80
+coverageFailOnMinimum := false
+coverageHighlighting := true

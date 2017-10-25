@@ -16,10 +16,11 @@ The service is powered by Scala/Play.
 - `sbt`
 
 
-## Run
+## Run Locally
 - Set up database access in `conf/application.conf`
 - Run the dev server: `sbt run`
 
 
-# Test
-- `sbt test`
+# Tests
+- Run the test suite: `./scripts/test.sh`
+- Run the coverage report: `./scripts/test_coverage.sh`
