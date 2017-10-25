@@ -1,4 +1,5 @@
 @(word: String,
+        lang: String,
         customOpt: Option[Word],
         wikiOpt: Option[String],
         yandexTransOpt: Option[String],
@@ -53,13 +54,13 @@
     </dl>
 }
 
-@base(s"$word", css = css) {
+@base(s"$word ($lang)", css = css) {
     @flash.get("message").fold(Html("")) { msg =>
         <div class="alert alert-success" role="alert">@msg</div>
     }
 
     @panel("custom-definition-panel", "Custom definition", customOpt.map(asCustomDef)) {
-        <a href="@routes.WordController.editForm(word)">edit</a>
+        <a href="@routes.WordController.editForm(word, lang)">edit</a>
     }
 
     @panel("wiktionary-definition-panel", "Wiktionary", wikiOpt.map(asHTML))()

@@ -20,42 +20,46 @@ class WordController @Inject()(val messagesApi: MessagesApi,
                                val yandexDictionarySource: YandexDictionarySource,
                                val wordsRepo: WordsRepository) extends Controller with I18nSupport {
 
-  def editForm(word: String) = Action.async { implicit request =>
-    wordsRepo.get(word).map { wordOpt =>
-      val form = wordOpt.fold(wordForm(word))(wordForm(word).fill)
-      Ok(views.html.wordForm(word, form))
+  def editForm(word: String, lang: String) = Action.async { implicit request =>
+    wordsRepo.get(word, lang).map { wordOpt =>
+      val form = wordOpt.fold(wordForm(word, lang))(wordForm(word, lang).fill)
+      Ok(views.html.wordForm(word, lang, form))
     }
   }
 
-  def edit(word: String) = Action.async { implicit request =>
-    wordForm(word).bindFromRequest.fold(
+  def edit(word: String, lang: String) = Action.async { implicit request =>
+    wordForm(word, lang).bindFromRequest.fold(
       formWithErrors => {
-        Future.successful(BadRequest(views.html.wordForm(word, formWithErrors)))
+        Future.successful(BadRequest(views.html.wordForm(word, lang, formWithErrors)))
       },
       submission => {
         val newWord = Word(None, submission.word, submission.lang, submission.definitions)
         wordsRepo.upsert(newWord).map {
           case Success(_) => {
-            Redirect(routes.WordController.get(submission.word))
+            Redirect(routes.WordController.get(word, lang))
               .flashing("message" -> s"""Successfully updated definition of "$word".""")
           }
           case Failure(e) => {
             println(s"Failed to save word: ${e.getMessage}")
-            val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
-            InternalServerError(views.html.wordForm(word, formWithError))
+            val formWithError = wordForm(word, lang).withGlobalError("Error occurred while saving, please try again.")
+            InternalServerError(views.html.wordForm(word, lang, formWithError))
           }
         }
       }
     )
   }
 
-  def get(word: String) = Action.async { implicit request =>
-    for {
-      customOpt <- wordsRepo.get(word)
-      wikiOpt <- wiktionarySource.get(word)
-      yandexTransOpt <- yandexTranslateSource.get(word)
-      yandexDictOpt <- yandexDictionarySource.get(word)
-    } yield Ok(views.html.word(word, customOpt, wikiOpt, yandexTransOpt, yandexDictOpt))
+  def get(word: String, lang: String) = Action.async { implicit request =>
+    if (!forms.WordForm.validLanguages.contains(lang)) {
+      Future.successful(BadRequest)
+    } else {
+      for {
+        customOpt <- wordsRepo.get(word, lang)
+        wikiOpt <- wiktionarySource.get(word)
+        yandexTransOpt <- yandexTranslateSource.get(word)
+        yandexDictOpt <- yandexDictionarySource.get(word)
+      } yield Ok(views.html.word(word, lang, customOpt, wikiOpt, yandexTransOpt, yandexDictOpt))
+    }
   }
 
   def getAll() = Action.async {

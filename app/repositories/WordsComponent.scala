@@ -29,12 +29,4 @@ trait WordsComponent {
     val query = (words returning words.map(_.id)) += WordRecord(None, word, lang)
     db.run(query)
   }
-
-  def updateWordRecord(id: Long, word: String, lang: String): Future[Try[Unit]] = {
-    val query = words.filter(_.id === id).update(WordRecord(Some(id), word, lang))
-    db.run(query).map {
-      case count if count == 1 => Success(Unit)
-      case count => Failure(new Exception(s"Failed to update word record ($word) for word id=$id. Count=$count."))
-    }
-  }
 }

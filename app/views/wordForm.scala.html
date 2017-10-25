@@ -1,4 +1,4 @@
-@(word: String, wordForm: Form[Word])(implicit messages: Messages)
+@(word: String, lang: String, wordForm: Form[Word])(implicit messages: Messages)
 
 @import b3.vertical.fieldConstructor
 
@@ -6,15 +6,14 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/wordForm.css")">
 }
 
-@base(s"""Define "$word"""", css = css) {
+@base(s"""Define "$word ($lang)"""", css = css) {
     @if(wordForm.hasGlobalErrors) {
         @for(error <- wordForm.globalErrors) {
             <div class="alert alert-danger" role="alert">@Messages(error.messages, error.args)</div>
         }
     }
 
-    @b3.form(action = routes.WordController.edit(word), 'id -> "edit-form") {
-        @b3.text(wordForm("lang"), 'placeholder -> "Language")
+    @b3.form(action = routes.WordController.edit(word, lang), 'id -> "edit-form") {
         @b3.textarea(wordForm("definitions"), 'placeholder -> "Definition")
         @b3.submit('class -> "btn btn-default") {Save}
     }

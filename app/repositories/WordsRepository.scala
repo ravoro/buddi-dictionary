@@ -26,18 +26,18 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     mapWordsById
   }
 
-  def get(word: String): Future[Option[Word]] = {
+  def get(word: String, lang: String): Future[Option[Word]] = {
     val query = for {
       (w, d) <- words joinLeft definitions on (_.id === _.wid)
-      if w.word === word
+      if w.word === word && w.lang === lang
     } yield (w, d)
 
-    def findWordByName(records: Map[Long, Word], word: String): Option[Word] =
-      records.find(_._2.word == word).map(_._2)
+    def findWordByNameLang(records: Map[Long, Word], word: String): Option[Word] =
+      records.find { case (_, w) => w.word == word && w.lang == lang }.map(_._2)
 
     for {
       rows <- db.run(query.result)
-    } yield findWordByName(rowsToMap(rows.toList), word)
+    } yield findWordByNameLang(rowsToMap(rows.toList), word)
   }
 
   def getAll(): Future[Seq[Word]] = {
@@ -56,7 +56,7 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
      * If the word does not exist, creates a new WordRecord and returns the resulting Word with no definitions.
      */
     def getOrInitialize(word: String, lang: String): Future[Word] = {
-      get(word).flatMap { wordOpt =>
+      get(word, lang).flatMap { wordOpt =>
         wordOpt.fold {
           insertWordRecord(word, lang).map { id =>
             Word(Some(id), word, lang, List())
@@ -76,16 +76,15 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     }
 
     // TODO: needs to be a transaction
-    // TODO: word needs to be deleted if toRemain.isEmpty
+    // TODO: word needs to be deleted if newWord.defs.isEmpty
     for {
       oldWord <- getOrInitialize(word.word, word.lang)
       wordID = oldWord.id.get
       (toRemain, toDelete, toInsert) = splitDefinitions(oldWord, word)
       deleteResult <- deleteDefinitionRecordBatch(wordID, toDelete)
       insertResult <- insertDefinitionRecordBatch(wordID, toInsert)
-      wordMetaResult <- updateWordRecord(wordID, word.word, word.lang)
     } yield {
-      if (wordMetaResult.isSuccess && insertResult.isSuccess && deleteResult.isSuccess) {
+      if (insertResult.isSuccess && deleteResult.isSuccess) {
         Success(Unit)
       } else {
         def resultStatus(result: Try[Unit]) = result match {
@@ -94,7 +93,6 @@ class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
         }
         Failure(new Exception(
           s"""Failed to upsert word=$word.
-              |meta=[${resultStatus(wordMetaResult)}].
               |insert=[${resultStatus(insertResult)}].
               |delete=[${resultStatus(deleteResult)}].""".stripMargin.replaceAll("\n", " ")))
       }

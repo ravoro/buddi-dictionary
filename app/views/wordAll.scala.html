@@ -4,7 +4,7 @@
     <dl>
     @for(word <- words) {
         <dt>@word.word <em>(@word.lang)</em></dt>
-        <dd><a href="@routes.WordController.get(word.word)">View details of @word.word</a></dd>
+        <dd><a href="@routes.WordController.get(word.word, word.lang)">View details of @word.word</a></dd>
     }
     </dl>
     <p>Count: @words.length</p>

@@ -1,11 +1,11 @@
-GET         /                          controllers.HomeController.get
+GET         /                                controllers.HomeController.get
 
-POST        /searchbox                 controllers.SearchBoxController.search
+POST        /searchbox                       controllers.SearchBoxController.search
 
-GET         /words                     controllers.WordController.getAll
-GET         /words/:word               controllers.WordController.get(word)
-GET         /words/:word/define        controllers.WordController.editForm(word)
-POST        /words/:word/define        controllers.WordController.edit(word)
+GET         /words                           controllers.WordController.getAll
+GET         /words/:word/:lang               controllers.WordController.get(word, lang)
+GET         /words/:word/:lang/define        controllers.WordController.editForm(word, lang)
+POST        /words/:word/:lang/define        controllers.WordController.edit(word, lang)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file              controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                    controllers.Assets.versioned(path="/public", file: Asset)
