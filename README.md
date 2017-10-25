@@ -1,4 +1,7 @@
 # Personal Dictionary
+
+[![Build Status](https://travis-ci.org/ravoro/personal-dictionary.svg?branch=master)](https://travis-ci.org/ravoro/personal-dictionary)
+
 Personalizable online dictionary allowing you to:
 
 - View and compare standard defitions from various reliable sources.
