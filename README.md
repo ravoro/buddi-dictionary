@@ -1,8 +1,12 @@
-# Personal Dictionary
+# BudDi Dictionary
 
-[![Build Status](https://travis-ci.org/ravoro/personal-dictionary.svg?branch=master)](https://travis-ci.org/ravoro/personal-dictionary)
+[![Build Status](https://travis-ci.org/ravoro/buddi-dictionary.svg?branch=master)](https://travis-ci.org/ravoro/buddi-dictionary)
 
-Personalizable online dictionary allowing you to:
+
+> ***BudDi** - your dictionary buddy :)*
+
+
+BudDi is a personalizable online dictionary allowing you to:
 
 - View and compare standard defitions from various reliable sources.
 - Provide and view your own custom definitions.
