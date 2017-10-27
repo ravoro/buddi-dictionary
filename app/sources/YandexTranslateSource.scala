@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 @Singleton
 class YandexTranslateSource @Inject()(ws: WSClient) extends Controller {
-  private def buildUrl(text: String, lang: String = "ru"): String =
+  private def buildUrl(text: String, lang: String = "en-en"): String =
     s"""https://translate.yandex.net/api/v1.5/tr.json/translate
         |?key=trnsl.1.1.20161128T195751Z.bec3f4c654f96917.83e6de3330e8699e31092052ac0131d06ef35361
         |&text=$text

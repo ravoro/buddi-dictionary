@@ -1,5 +1,19 @@
-@()(implicit messages: Messages)
+@()(implicit messages: Messages, request: RequestHeader)
 
-@base("Home") {
-    <h2>Welcome to the BudDi homepage</h2>
+@import includes.searchbox
+
+@css = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/home.css")">
+}
+
+@base(css = css) {
+    <h1>
+        <strong>BudDi</strong> Dictionary <small>&mdash; Your dictionary buddy :)</small>
+    </h1>
+
+    @searchbox(placeholder = "Search for a definition")
+
+    <p class="note">
+        <em><strong>Note:</strong> Currently only support words and definitions in English.</em>
+    </p>
 }

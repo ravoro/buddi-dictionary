@@ -58,7 +58,7 @@ class WordController @Inject()(val messagesApi: MessagesApi,
     } yield Ok(views.html.word(word, customOpt, wikiOpt, yandexTransOpt, yandexDictOpt))
   }
 
-  def getAll() = Action.async {
+  def getAll() = Action.async { implicit request =>
     wordsRepo.getAll().map { words =>
       Ok(views.html.wordAll(words))
     }

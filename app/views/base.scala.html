@@ -1,4 +1,4 @@
-@(title: String, css: Html = Html(""), js: Html = Html(""))(content: Html)(implicit messages: Messages)
+@(title: Option[String] = None, css: Html = Html(""), js: Html = Html(""))(content: Html)(implicit messages: Messages, request: RequestHeader)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,14 +7,16 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/non-responsive.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/base.css")">
         @css
-        <title>@title | BudDi Dictionary</title>
+        <title>@title.fold("")(t => s"$t | ")BudDi Dictionary</title>
     </head>
     <body>
         @header()
         <div class="container">
-            <div class="page-header">
-                <h1>@title</h1>
-            </div>
+            @if(title.nonEmpty) {
+                <div class="page-header">
+                    <h1>@title</h1>
+                </div>
+            }
             @content
         </div>
 

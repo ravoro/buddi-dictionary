@@ -2,7 +2,7 @@
         customOpt: Option[Word],
         wikiOpt: Option[String],
         yandexTransOpt: Option[String],
-        yandexDictOpt: Option[String])(implicit flash: Flash, messages: Messages)
+        yandexDictOpt: Option[String])(implicit flash: Flash, messages: Messages, request: RequestHeader)
 
 @css = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/word.css")">
@@ -34,18 +34,16 @@
     </div>
 }
 
-@base(s"$word", css = css) {
+@base(Some(s"$word"), css = css) {
     @flash.get("message").fold(Html("")) { msg =>
         <div class="alert alert-success" role="alert">@msg</div>
     }
 
-    @panel("custom-definition-panel", "Custom definition", customOpt.map(_.definitions.mkString(", "))) {
+    @panel("custom-definition-panel", "Your Definition", customOpt.map(_.definitions.mkString(", "))) {
         <a href="@routes.WordController.editForm(word)">edit</a>
     }
 
-    @panel("wiktionary-definition-panel", "Wiktionary", wikiOpt, definitionsAsHTML = true)()
-
-    @panel("yandex-translate-definition-panel", "Yandex Translate", yandexTransOpt)()
-
     @panel("yandex-dictionary-definition-panel", "Yandex Dictionary", yandexDictOpt)()
+
+    @panel("wiktionary-definition-panel", "Wiktionary", wikiOpt, definitionsAsHTML = true)()
 }

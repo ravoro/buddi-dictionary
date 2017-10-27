@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 @Singleton
 class YandexDictionarySource @Inject()(ws: WSClient) extends Controller {
-  private def buildUrl(text: String, lang: String = "en-ru"): String =
+  private def buildUrl(text: String, lang: String = "en-en"): String =
     s"""https://dictionary.yandex.net/api/v1/dicservice.json/lookup
         |?key=dict.1.1.20161128T230211Z.10e66141871b65ef.fb53101a964a5d0cf3a338416d0658c19687dd24
         |&text=$text

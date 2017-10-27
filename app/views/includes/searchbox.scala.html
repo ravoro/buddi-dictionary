@@ -1,0 +1,9 @@
+@(classAttr: String = "", placeholder: String = "BudDi Search")(implicit messages: Messages, request: RequestHeader)
+
+@import b3.inline.fieldConstructor
+@import forms.SearchBoxForm.{form => searchBoxForm}
+
+@b3.form(routes.SearchBoxController.search, 'class -> classAttr) {
+    @b3.text(searchBoxForm("query"), 'placeholder -> placeholder, 'autofocus -> "autofocus")
+    @b3.submit('class -> "btn btn-default") {Search}
+}

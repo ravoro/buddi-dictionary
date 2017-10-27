@@ -1,18 +1,24 @@
-@()(implicit messages: Messages)
+@()(implicit messages: Messages, request: RequestHeader)
 
-@import b3.inline.fieldConstructor
-@import forms.SearchBoxForm.{form => searchBoxForm}
+@import includes.searchbox
+
+@activeClass(path: String) = @{
+    if(request.uri == path) "active"
+}
 
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div id="navbar">
             <ul class="nav navbar-nav">
-                <li><a href="@routes.HomeController.get">Home</a></li>
-                <li><a href="@routes.WordController.getAll">All words</a></li>
+                <li class="@activeClass(routes.HomeController.get.url)">
+                    <a href="@routes.HomeController.get"><strong>BudDi</strong></a>
+                </li>
+                <li class="@activeClass(routes.WordController.getAll.url)">
+                    <a href="@routes.WordController.getAll">Your Definitions</a>
+                </li>
             </ul>
-            @b3.form(routes.SearchBoxController.search, 'class -> "navbar-form navbar-right") {
-                @b3.text(searchBoxForm("query"), 'placeholder -> "Search", 'autofocus -> "autofocus")
-                @b3.submit('class -> "btn btn-default") {Search}
+            @if(request.uri != routes.HomeController.get.url) {
+                @searchbox(classAttr = "navbar-form navbar-right")
             }
         </div>
     </div>

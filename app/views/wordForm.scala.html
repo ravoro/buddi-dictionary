@@ -1,4 +1,4 @@
-@(word: String, wordForm: Form[Word])(implicit messages: Messages)
+@(word: String, wordForm: Form[Word])(implicit messages: Messages, request: RequestHeader)
 
 @import b3.vertical.fieldConstructor
 
@@ -6,7 +6,7 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/wordForm.css")">
 }
 
-@base(s"""Define "$word"""", css = css) {
+@base(Some(s"""Define "$word""""), css = css) {
     @if(wordForm.hasGlobalErrors) {
         @for(error <- wordForm.globalErrors) {
             <div class="alert alert-danger" role="alert">@Messages(error.messages, error.args)</div>
