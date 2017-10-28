@@ -10,12 +10,7 @@ class SearchBoxController @Inject()() extends Controller {
   def search = Action { implicit request =>
     form.bindFromRequest.fold(
       formWithErrors => BadRequest,
-      submission => {
-        val path =
-          if (submission.query.isEmpty) routes.WordController.getAll
-          else routes.WordController.get(submission.query)
-        Redirect(path)
-      }
+      submission => Redirect(routes.WordController.get(submission.query))
     )
   }
 }

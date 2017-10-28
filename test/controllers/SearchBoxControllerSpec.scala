@@ -19,12 +19,14 @@ class SearchBoxControllerSpec extends PlaySpec {
       redirectLocation(result) mustBe Some(routes.WordController.get(mockFormData("query")).url)
     }
 
-    "return 303 and direct user to the all words page if the provided word is empty" in {
-      val formData = Map("query" -> "")
-      val request = FakeRequest().withFormUrlEncodedBody(formData.toSeq: _*)
-      val result = buildController().search()(request)
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.WordController.getAll.url)
+    "return 400 if given an empty input" in {
+      val emptyInputs = Seq("", " ", "    ")
+      for (input <- emptyInputs) {
+        val formData = Map("query" -> input)
+        val request = FakeRequest().withFormUrlEncodedBody(formData.toSeq: _*)
+        val result = buildController().search()(request)
+        status(result) mustBe BAD_REQUEST
+      }
     }
   }
 }
