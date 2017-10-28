@@ -6,7 +6,7 @@ import forms.WordForm.{form => wordForm}
 import models.Word
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import repositories.WordsRepository
+import repositories.WordRepository
 import sources.{WiktionarySource, YandexDictionarySource, YandexTranslateSource}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,10 +18,10 @@ class WordController @Inject()(val messagesApi: MessagesApi,
                                val wiktionarySource: WiktionarySource,
                                val yandexTranslateSource: YandexTranslateSource,
                                val yandexDictionarySource: YandexDictionarySource,
-                               val wordsRepo: WordsRepository) extends Controller with I18nSupport {
+                               val wordRepo: WordRepository) extends Controller with I18nSupport {
 
   def editForm(word: String) = Action.async { implicit request =>
-    wordsRepo.get(word).map { wordOpt =>
+    wordRepo.get(word).map { wordOpt =>
       val form = wordOpt.fold(wordForm(word))(wordForm(word).fill)
       Ok(views.html.wordForm(word, form))
     }
@@ -34,7 +34,7 @@ class WordController @Inject()(val messagesApi: MessagesApi,
       },
       submission => {
         val newWord = Word(None, submission.word, submission.definitions)
-        wordsRepo.upsert(newWord).map {
+        wordRepo.upsert(newWord).map {
           case Success(_) => {
             Redirect(routes.WordController.get(submission.word))
               .flashing("message" -> s"""Successfully updated definition of "$word".""")
@@ -51,7 +51,7 @@ class WordController @Inject()(val messagesApi: MessagesApi,
 
   def get(word: String) = Action.async { implicit request =>
     for {
-      customOpt <- wordsRepo.get(word)
+      customOpt <- wordRepo.get(word)
       wikiOpt <- wiktionarySource.get(word)
       yandexTransOpt <- yandexTranslateSource.get(word)
       yandexDictOpt <- yandexDictionarySource.get(word)
@@ -59,7 +59,7 @@ class WordController @Inject()(val messagesApi: MessagesApi,
   }
 
   def getAll() = Action.async { implicit request =>
-    wordsRepo.getAll().map { words =>
+    wordRepo.getAll().map { words =>
       Ok(views.html.wordAll(words))
     }
   }

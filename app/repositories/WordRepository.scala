@@ -12,7 +12,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class WordsRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
+class WordRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
   extends HasDatabaseConfigProvider[JdbcProfile] with WordsComponent with DefinitionsComponent {
 
   import driver.api._

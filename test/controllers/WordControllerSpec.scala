@@ -10,7 +10,7 @@ import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
-import repositories.WordsRepository
+import repositories.WordRepository
 import sources.{WiktionarySource, YandexDictionarySource, YandexTranslateSource}
 
 import scala.concurrent.Future
@@ -22,7 +22,7 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
     Configuration.reference,
     new DefaultLangs(Configuration.reference))
 
-  def buildController(wordsRepo: WordsRepository = buildWordsRepo(),
+  def buildController(wordsRepo: WordRepository = buildWordsRepo(),
                       wikiRepo: WiktionarySource = buildWikiRepo(),
                       yandexTransRepo: YandexTranslateSource = buildYandexTranRepo(),
                       yandexDictRepo: YandexDictionarySource = buildYandexDictRepo(),
@@ -31,7 +31,7 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
   }
 
   def buildWordsRepo(getResult: Option[Word] = None, upsertResult: Try[Unit] = Success(())) = {
-    val mockRepo = mock[WordsRepository]
+    val mockRepo = mock[WordRepository]
     when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
     when(mockRepo.upsert(any())).thenReturn(Future.successful(upsertResult))
     mockRepo
