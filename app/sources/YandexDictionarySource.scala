@@ -2,22 +2,22 @@ package sources
 
 import javax.inject._
 
+import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.mvc.Controller
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
 @Singleton
-class YandexDictionarySource @Inject()(ws: WSClient) extends Controller {
+class YandexDictionarySource @Inject()(ws: WSClient) {
   private def buildUrl(text: String, lang: String = "en-en"): String =
     s"""https://dictionary.yandex.net/api/v1/dicservice.json/lookup
-        |?key=dict.1.1.20161128T230211Z.10e66141871b65ef.fb53101a964a5d0cf3a338416d0658c19687dd24
-        |&text=$text
-        |&lang=$lang
-        |""".stripMargin.replaceAll("\n", "")
+       |?key=dict.1.1.20161128T230211Z.10e66141871b65ef.fb53101a964a5d0cf3a338416d0658c19687dd24
+       |&text=$text
+       |&lang=$lang
+       |""".stripMargin.replaceAll("\n", "")
 
   private case class YandexResult(`def`: List[Def])
 
