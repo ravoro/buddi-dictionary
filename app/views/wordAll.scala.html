@@ -1,6 +1,6 @@
 @(words: Seq[Word])(implicit messages: Messages, request: RequestHeader)
 
-@base(Some(s"Your Words")) {
+@base("page-user-words", Some(s"Your Words")) {
     <table class="table">
         <thead>
             <tr>

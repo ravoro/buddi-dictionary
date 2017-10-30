@@ -34,7 +34,7 @@
     </div>
 }
 
-@base(Some(s"$word"), css = css) {
+@base("page-word", Some(s"$word"), css = css) {
     @flash.get("message").fold(Html("")) { msg =>
         <div class="alert alert-success" role="alert">@msg</div>
     }
