@@ -5,9 +5,34 @@ import javax.inject._
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
+import YandexDictionarySource.YandexResult
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+
+object YandexDictionarySource {
+
+  case class YandexResult(`def`: List[Def])
+
+  case class Def(text: String, pos: String, tr: List[Tr])
+
+  case class Tr(text: String,
+                pos: String,
+                syn: Option[List[BaseText]] = None,
+                mean: Option[List[BaseText]] = None,
+                ex: Option[List[Ex]] = None)
+
+  case class Ex(text: String, tr: List[BaseText])
+
+  case class BaseText(text: String)
+
+  implicit val formatBaseText = Json.format[BaseText]
+  implicit val formatEx = Json.format[Ex]
+  implicit val formatTr = Json.format[Tr]
+  implicit val formatDef = Json.format[Def]
+  implicit val formatYandexResult = Json.format[YandexResult]
+}
 
 
 @Singleton
@@ -18,27 +43,6 @@ class YandexDictionarySource @Inject()(ws: WSClient) {
        |&text=$text
        |&lang=$lang
        |""".stripMargin.replaceAll("\n", "")
-
-  private case class YandexResult(`def`: List[Def])
-
-  private case class Def(text: String, pos: String, tr: List[Tr])
-
-  private case class Tr(text: String,
-                        pos: String,
-                        syn: Option[List[BaseText]],
-                        mean: Option[List[BaseText]],
-                        ex: Option[List[Ex]])
-
-  private case class Ex(text: String, tr: List[BaseText])
-
-  private case class BaseText(text: String)
-
-  private implicit val formatBaseText = Json.format[BaseText]
-  private implicit val formatEx = Json.format[Ex]
-  private implicit val formatTr = Json.format[Tr]
-  private implicit val formatDef = Json.format[Def]
-  private implicit val formatYandexResult = Json.format[YandexResult]
-
 
   def get(word: String): Future[Option[String]] = ws.url(buildUrl(word)).get.map { response =>
     response.status match {
