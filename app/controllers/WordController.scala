@@ -40,7 +40,7 @@ class WordController @Inject()(val messagesApi: MessagesApi,
               .flashing("message" -> s"""Successfully updated definition of "$word".""")
           }
           case Failure(e) => {
-            println(s"Failed to save word: ${e.getMessage}")
+            // TODO: add logging - s"Failed to save word: ${e.getMessage}"
             val formWithError = wordForm(word).withGlobalError("Error occurred while saving, please try again.")
             InternalServerError(views.html.wordForm(word, formWithError))
           }

@@ -2,7 +2,7 @@ package repositories
 
 import org.scalatestplus.play.PlaySpec
 
-class WordsRepositorySpec extends PlaySpec {
+class WordRepositorySpec extends PlaySpec {
   "get" must {
     "return None if the given word does not exist" in {
       pending
