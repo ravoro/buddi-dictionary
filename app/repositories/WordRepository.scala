@@ -38,14 +38,14 @@ class WordRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     } yield findWordByName(rowsToMap(rows), word)
   }
 
-  def getAll(): Future[Seq[Word]] = {
+  def getAll(): Future[List[Word]] = {
     val query = for {
       (w, d) <- words joinLeft definitions on (_.id === _.wid)
     } yield (w, d)
 
     for {
       rows <- db.run(query.result)
-    } yield rowsToMap(rows).values.toSeq
+    } yield rowsToMap(rows).values.toList.sortBy(_.word)
   }
 
   def upsert(word: Word): Future[Try[Unit]] = {
