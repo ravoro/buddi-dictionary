@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class WordRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
-  extends HasDatabaseConfigProvider[JdbcProfile] with WordsComponent with DefinitionsComponent {
+  extends HasDatabaseConfigProvider[JdbcProfile] with WordComponent with DefinitionComponent {
 
   import driver.api._
 
@@ -56,7 +56,7 @@ class WordRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     def getOrInitialize(word: String): Future[Word] = {
       get(word).flatMap { wordOpt =>
         wordOpt.fold {
-          insertWordRecord(word).map { id =>
+          insertWord(word).map { id =>
             Word(Some(id), word, Seq())
           }
         }(Future.successful(_))
@@ -78,13 +78,13 @@ class WordRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
       oldWord <- getOrInitialize(word.word)
       wordID = oldWord.id.get
       (toRemain, toDelete, toInsert) = splitDefinitions(oldWord, word)
-      insertResult <- insertDefinitionRecordBatch(wordID, toInsert)
-      deleteResult <- deleteDefinitionRecordBatch(wordID, toDelete)
+      insertResult <- insertDefinitionBatch(wordID, toInsert)
+      deleteResult <- deleteDefinitionBatch(wordID, toDelete)
     } yield {
       if (insertResult.isSuccess && deleteResult.isSuccess) {
         Success(Unit)
       } else {
-        def resultStatus(result: Try[Unit]) = result match {
+        def resultStatus(result: Try[Any]) = result match {
           case Success(_) => "Success"
           case Failure(e) => s"Failure: ${e.getMessage}}"
         }

@@ -6,7 +6,7 @@ if [ ! -d app ]; then
     exit
 fi
 
-sbt clean coverage test coverageReport
+sbt clean coverage test it:test coverageReport
 
 HTML=$(ls $(pwd)/target/scala-*/scoverage-report/index.html)
 echo -e "\nHTML coverage report: $HTML"
