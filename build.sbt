@@ -7,6 +7,7 @@ libraryDependencies ++= Seq(
   "org.jsoup" % "jsoup" % "1.10.3",
   "org.mockito" % "mockito-core" % "2.11.0",
   "mysql" % "mysql-connector-java" % "5.1.44",
+  "com.h2database" % "h2" % "1.4.196",
 
   // Play-specific
   ws,
@@ -17,10 +18,20 @@ libraryDependencies ++= Seq(
 )
 
 
-coverageExcludedPackages := "<empty>;router\\..*;views\\..*;repositories\\..*Table"
+// setup integration tests
+lazy val ITest = config("it").extend(Test)
+javaOptions in ITest += "-Dconfig.resource=test_integration.conf"
+scalaSource in ITest := baseDirectory.value / "/test_integration"
+
+
+// coverage settings
+coverageExcludedPackages := "<empty>;router\\..*;views\\..*;repositories\\..*Component\\.(Definitions|Words)"
 coverageMinimum := 80
 coverageFailOnMinimum := false
 coverageHighlighting := true
 
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .configs(ITest)
+  .settings(inConfig(ITest)(Defaults.testSettings): _*)
