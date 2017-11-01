@@ -30,4 +30,5 @@ The service is powered by Scala/Play.
 
 # Tests
 - Run the test suite: `./scripts/test.sh`
+- Run the integration test suite: `./scripts/test_integration.sh`
 - Run the coverage report: `./scripts/test_coverage.sh`
