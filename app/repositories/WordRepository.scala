@@ -69,7 +69,7 @@ class WordRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)
       val toRemain = oldDefs intersect newDefs
       val toDelete = oldDefs diff toRemain
       val toInsert = newDefs diff toRemain
-      println(s"split definitions: $oldDefs...$newDefs...$toRemain...$toDelete...$toInsert")
+      // TODO: add logging - s"split definitions: $oldDefs...$newDefs...$toRemain...$toDelete...$toInsert"
       (toRemain, toDelete, toInsert)
     }
 

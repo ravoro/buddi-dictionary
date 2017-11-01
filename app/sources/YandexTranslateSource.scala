@@ -5,9 +5,19 @@ import javax.inject._
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
+import YandexTranslateSource.YandexResult
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+
+object YandexTranslateSource {
+
+  case class YandexResult(code: Int, lang: String, text: List[String])
+
+  implicit val format = Json.format[YandexResult]
+}
+
 
 @Singleton
 class YandexTranslateSource @Inject()(ws: WSClient) {
@@ -17,10 +27,6 @@ class YandexTranslateSource @Inject()(ws: WSClient) {
        |&text=$text
        |&lang=$lang
        |""".stripMargin.replaceAll("\n", "")
-
-  private case class YandexResult(code: Int, lang: String, text: List[String])
-
-  private implicit val format = Json.format[YandexResult]
 
   def get(word: String): Future[Option[String]] = ws.url(buildUrl(word)).get.map { response =>
     response.status match {

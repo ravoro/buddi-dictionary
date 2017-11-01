@@ -6,10 +6,9 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
 import repositories.WordRepository
 import sources.{WiktionarySource, YandexDictionarySource, YandexTranslateSource}
 
@@ -17,11 +16,6 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 class WordControllerSpec extends PlaySpec with MockitoSugar {
-  val mockMessagesApi = new DefaultMessagesApi(
-    Environment.simple(),
-    Configuration.reference,
-    new DefaultLangs(Configuration.reference))
-
   def buildController(wordsRepo: WordRepository = buildWordsRepo(),
                       wikiRepo: WiktionarySource = buildWikiRepo(),
                       yandexTransRepo: YandexTranslateSource = buildYandexTranRepo(),
@@ -30,9 +24,12 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
     new WordController(messagesApi, wikiRepo, yandexTransRepo, yandexDictRepo, wordsRepo)
   }
 
-  def buildWordsRepo(getResult: Option[Word] = None, upsertResult: Try[Unit] = Success(())) = {
+  def buildWordsRepo(getResult: Option[Word] = None,
+                     getAllResult: List[Word] = List(),
+                     upsertResult: Try[Unit] = Success(())) = {
     val mockRepo = mock[WordRepository]
     when(mockRepo.get(any())).thenReturn(Future.successful(getResult))
+    when(mockRepo.getAll()).thenReturn(Future.successful(getAllResult))
     when(mockRepo.upsert(any())).thenReturn(Future.successful(upsertResult))
     mockRepo
   }
@@ -57,6 +54,7 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
 
 
   val mockWord = Word(None, "hello", Seq("hey", "type of greeting"))
+  val mockWordsAll = List(mockWord, Word(None, "bye", Seq("see ya", "toodles")))
 
   "editForm" must {
     "return 200 and display an empty word form if no custom definition exists" in {
@@ -100,7 +98,12 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
     }
 
     "return 400 and display the edit form with errors when an invalid submission is made" in {
-      pending
+      val formData = Map("randomkey" -> "randomval")
+      val request = FakeRequest().withFormUrlEncodedBody(formData.toSeq: _*)
+      val result = buildController().edit(mockWord.word)(request)
+      status(result) mustBe BAD_REQUEST
+      val doc = Jsoup.parse(contentAsString(result))
+      doc.select("#definitions_error_0").size mustBe 1
     }
 
     "return 500 and redisplay the form with an error when an error occurs during saving" in {
@@ -138,6 +141,24 @@ class WordControllerSpec extends PlaySpec with MockitoSugar {
       val doc = Jsoup.parse(contentAsString(result))
       doc.select(".alert-success").size mustBe 1
       doc.select(".alert-success").get(0).text mustBe request.flash.get("message").get
+    }
+  }
+
+  "getAll" must {
+    "return 200 and display a list of all user definitions" in {
+      val mockRepo = buildWordsRepo(getAllResult = mockWordsAll)
+      val result = buildController(mockRepo).getAll()(FakeRequest())
+      status(result) mustBe OK
+      val doc = Jsoup.parse(contentAsString(result))
+      doc.select("tbody tr").size mustBe mockWordsAll.length
+    }
+
+    "return 200 and display an empty list if there are no user definitions" in {
+      val mockRepo = buildWordsRepo(getAllResult = List())
+      val result = buildController(mockRepo).getAll()(FakeRequest())
+      status(result) mustBe OK
+      val doc = Jsoup.parse(contentAsString(result))
+      doc.select("tbody tr").size mustBe 0
     }
   }
 }
