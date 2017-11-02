@@ -1,0 +1,17 @@
+component_depth: 1
+languages:
+  - name: scala
+    production:
+      include:
+        - /app/.*\.scala
+    test:
+      include:
+        - /test/.*
+        - /test_integration/.*
+  - name: script
+    production:
+      include:
+        - /scripts/.*\.sh
+    test:
+      exclude:
+        - /.*

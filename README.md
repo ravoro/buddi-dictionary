@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ravoro/buddi-dictionary.svg?branch=master)](https://travis-ci.org/ravoro/buddi-dictionary)
 [![Coverage Status](https://coveralls.io/repos/github/ravoro/buddi-dictionary/badge.svg?branch=master)](https://coveralls.io/github/ravoro/buddi-dictionary?branch=master)
+[![BCH compliance](https://bettercodehub.com/edge/badge/ravoro/buddi-dictionary?branch=master)](https://bettercodehub.com/)
 
 
 > ***BudDi** - your dictionary buddy :)*
